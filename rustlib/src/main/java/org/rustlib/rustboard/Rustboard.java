@@ -15,11 +15,11 @@ import static org.rustlib.rustboard.NoticeType.NOTICE_TYPE_KEY;
 import static org.rustlib.rustboard.RustboardServer.NEW_STORED_RUSTBOARD_DIR;
 import static org.rustlib.rustboard.RustboardServer.OLD_STORED_RUSTBOARD_DIR;
 import static org.rustlib.rustboard.RustboardServer.USER_DATA_DIR;
-import static org.rustlib.rustboard.RustboardServer.log;
 
 import org.java_websocket.WebSocket;
 import org.rustlib.commandsystem.Command;
 import org.rustlib.geometry.Pose2d;
+import org.rustlib.logging.Logger;
 import org.rustlib.rustboard.RustboardNode.InvalidNodeJsonException;
 import org.rustlib.rustboard.RustboardNode.NoSuchNodeException;
 import org.rustlib.rustboard.RustboardNode.Type;
@@ -93,7 +93,7 @@ public class Rustboard {
             try {
                 this.nodes.add(RustboardNode.buildFromJson(nodeJson));
             } catch (InvalidNodeJsonException e) {
-                log(e);
+                Logger.log(e);
             }
         });
     }
@@ -211,7 +211,7 @@ public class Rustboard {
                     notifyClient("Saved path to robot", NoticeType.POSITIVE, 8000);
                 } catch (IOException | NullPointerException e) {
                     notifyClient("Could not save the path to the robot", NoticeType.NEGATIVE, 8000);
-                    log(e.toString());
+                    Logger.log(e);
                 }
                 break;
             case MessageActions.SAVE_VALUE:
@@ -220,7 +220,7 @@ public class Rustboard {
                     notifyClient("Saved value to robot", NoticeType.POSITIVE, 8000);
                 } catch (IOException | NullPointerException e) {
                     notifyClient("Could not save the value to the robot", NoticeType.NEGATIVE, 8000);
-                    log(e.toString());
+                    Logger.log(e);
                 }
                 break;
             case MessageActions.CLICK_BUTTON:
@@ -471,7 +471,7 @@ public class Rustboard {
         try {
             FileUtils.copyFile(getLatestRustboardVersion(uuid), getPreviousRustboardVersion(uuid));
         } catch (IOException e) {
-            RustboardServer.log(e);
+            Logger.log(e);
         } finally {
             save(newRustboardFile);
         }

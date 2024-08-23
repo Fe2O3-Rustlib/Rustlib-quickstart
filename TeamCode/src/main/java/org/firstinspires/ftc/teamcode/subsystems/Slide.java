@@ -103,8 +103,8 @@ public class Slide extends Subsystem {
         controller.setI(Rustboard.getDouble("slide kI", 0.0));
         controller.setD(Rustboard.getDouble("slide kD", 0.0008));
         feedforward = Rustboard.getDouble("slide feedforward", 0.2);
-//        RustboardServer.log(controller.getGains().toString()); // TODO: add logging again
-//        RustboardServer.log("feedforward: " + feedforward);
+//        Logger.log(controller.getGains().toString()); // TODO: add logging again
+//        Logger.log("feedforward: " + feedforward);
 //        RustboardServer.setNodeValue("slide pose", encoder.getTicks());
 //        RustboardServer.setNodeValue("slide velocity", encoder.ticksPerSecond());
 //        RustboardServer.setNodeValue("slide target", targetPosition);

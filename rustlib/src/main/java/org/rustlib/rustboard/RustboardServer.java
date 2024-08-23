@@ -138,10 +138,6 @@ public class RustboardServer extends WebSocketServer { // TODO: public, but only
         return debugMode;
     }
 
-    public static void log(Object value) { // TODO: create simpler logger
-
-    }
-
     private static void clearStorage() throws IOException {
         clearDir(RUSTBOARD_STORAGE_DIR, true);
     }
@@ -163,7 +159,7 @@ public class RustboardServer extends WebSocketServer { // TODO: public, but only
             try {
                 super.start();
             } catch (IllegalStateException e) {
-                log(e);
+                Logger.log(e);
             }
         }
     }
@@ -204,7 +200,7 @@ public class RustboardServer extends WebSocketServer { // TODO: public, but only
                 break;
             }
         }
-        log("client " + conn.getRemoteSocketAddress().toString() + " disconnected from the robot.");
+        Logger.log("client " + conn.getRemoteSocketAddress().toString() + " disconnected from the robot.");
     }
 
     @Override
@@ -248,7 +244,7 @@ public class RustboardServer extends WebSocketServer { // TODO: public, but only
         } catch (Exception e) {
             Rustboard.notifyAllClients("Robot received an invalid websocket message");
             warnClientConsoles(e);
-            log(e);
+            Logger.log(e);
             throw new RuntimeException(e.getMessage() + "\n" + message); // TODO: remove after debugging
         }
     }
@@ -286,7 +282,7 @@ public class RustboardServer extends WebSocketServer { // TODO: public, but only
 
     @Override
     public void onError(WebSocket conn, Exception e) {
-        log(e);
+        Logger.log(e);
     }
 
     public Set<WebSocket> getConnectedSockets() {

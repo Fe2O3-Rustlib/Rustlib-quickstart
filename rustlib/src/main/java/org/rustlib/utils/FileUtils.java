@@ -2,7 +2,7 @@ package org.rustlib.utils;
 
 import android.os.Environment;
 
-import org.rustlib.rustboard.RustboardServer;
+import org.rustlib.logging.Logger;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -174,7 +174,7 @@ public class FileUtils {
         try {
             writeBytes(output, bytes);
         } catch (IOException e) {
-            RustboardServer.log(e);
+            Logger.log(e);
         }
     }
 
@@ -196,7 +196,7 @@ public class FileUtils {
         try {
             writeString(output, string);
         } catch (IOException e) {
-            RustboardServer.log(e);
+            Logger.log(e);
         }
     }
 
@@ -204,7 +204,7 @@ public class FileUtils {
         try {
             writeJson(output, json);
         } catch (IOException e) {
-            RustboardServer.log(e);
+            Logger.log(e);
         }
     }
 
@@ -212,7 +212,7 @@ public class FileUtils {
         try {
             writeObjectToString(output, o);
         } catch (IOException e) {
-            RustboardServer.log(e);
+            Logger.log(e);
         }
     }
 
@@ -225,7 +225,7 @@ public class FileUtils {
         try {
             copyFile(source, target);
         } catch (IOException e) {
-            RustboardServer.log(e);
+            Logger.log(e);
         }
     }
 

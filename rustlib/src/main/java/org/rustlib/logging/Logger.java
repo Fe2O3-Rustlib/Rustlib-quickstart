@@ -1,6 +1,6 @@
 package org.rustlib.logging;
 
-import static org.rustlib.logging.JsonKeys.LOG_MESSAGE_KEY;
+import static org.rustlib.logging.JsonKeys.LOG_ENTRIES_ARRAY_KEY;
 import static org.rustlib.logging.MessageActions.NEW_LOG;
 import static org.rustlib.rustboard.MessageActions.MESSAGE_ACTION_KEY;
 
@@ -20,8 +20,12 @@ public class Logger {
         logEntries.add(new LogEntry(tag, data));
     }
 
-    public static void log(String tag, Exception e) {
-        log(tag, e.getMessage());
+    public static void log(Exception e) {
+        log("E", e.getMessage());
+    }
+
+    public static void log(String data) {
+        log("M", data);
     }
 
     private static void log(String tag, Object o) {
@@ -37,7 +41,7 @@ public class Logger {
         logEntries.forEach((logEntry) -> logEntryBuilder.add(logEntry.getJson()));
         JsonObject message = Json.createObjectBuilder()
                 .add(MESSAGE_ACTION_KEY, NEW_LOG)
-                .add(LOG_MESSAGE_KEY, logEntryBuilder)
+                .add(LOG_ENTRIES_ARRAY_KEY, logEntryBuilder)
                 .build();
         RustboardServer.sendToConnection(connection, message.toString());
     }

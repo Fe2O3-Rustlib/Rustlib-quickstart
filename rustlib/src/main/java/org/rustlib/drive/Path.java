@@ -3,7 +3,7 @@ package org.rustlib.drive;
 import com.google.gson.JsonParseException;
 
 import org.rustlib.geometry.Rotation2d;
-import org.rustlib.rustboard.RustboardServer;
+import org.rustlib.logging.Logger;
 import org.rustlib.utils.FileUtils;
 import org.rustlib.utils.Future;
 
@@ -82,7 +82,7 @@ public class Path implements Supplier<Path> {
             }
             return pathBuilder.setTimeout(timeout).build();
         } catch (IOException | JsonParseException e) {
-            RustboardServer.log(e.toString());
+            Logger.log(e);
         }
         return new Path();
     }

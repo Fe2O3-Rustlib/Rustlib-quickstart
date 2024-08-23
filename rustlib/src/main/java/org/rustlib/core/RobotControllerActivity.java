@@ -6,7 +6,7 @@ import com.qualcomm.hardware.HardwareFactory;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeManagerImpl.DefaultOpMode;
 
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
-import org.rustlib.rustboard.RustboardServer;
+import org.rustlib.logging.Logger;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
@@ -60,7 +60,7 @@ public class RobotControllerActivity extends FtcRobotControllerActivity {
             eventLoop.getOpModeManager().setHardwareMap(eventLoopHandler.getHardwareMap(eventLoop.getOpModeManager()));
             cfgFileMgr.sendActiveConfigToDriverStation();
         } catch (Exception e) {
-            RustboardServer.log(e);
+            Logger.log(e);
             throw new RuntimeException("Could not reload the hardware map.");
         }
     }

@@ -7,6 +7,8 @@ import static org.rustlib.rustboard.MessageActions.MESSAGE_ACTION_KEY;
 import org.java_websocket.WebSocket;
 import org.rustlib.rustboard.RustboardServer;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 
 import javax.json.Json;
@@ -21,7 +23,11 @@ public class Logger {
     }
 
     public static void log(Exception e) {
-        log("E", e.getMessage());
+        StringWriter stringWriter = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(stringWriter);
+        e.printStackTrace(printWriter);
+        e.printStackTrace(printWriter);
+        log("E", stringWriter.toString());
     }
 
     public static void log(String data) {

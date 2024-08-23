@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.opmodes.Robot;
 import org.rustlib.commandsystem.InstantCommand;
 import org.rustlib.core.OpModeCore;
 import org.rustlib.geometry.Pose2d;
+import org.rustlib.logging.Logger;
 import org.rustlib.rustboard.Rustboard;
 
 @TeleOp(name = "TeleOp")
@@ -15,6 +16,12 @@ public class Tele extends Robot implements OpModeCore {
 
     @Override
     public void opModeInit() {
+        Object thing = null;
+        try {
+            thing.toString();
+        } catch (NullPointerException e) {
+            Logger.log(e);
+        }
         Rustboard.updateInputNode("input_1", "Hello from the robot");
         if (alliance == Alliance.RED) {
             backdropPose = redBackdropPose;

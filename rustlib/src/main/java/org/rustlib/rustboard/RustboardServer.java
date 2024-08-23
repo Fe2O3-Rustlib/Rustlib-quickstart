@@ -185,6 +185,7 @@ public class RustboardServer extends WebSocketServer { // TODO: public, but only
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
+        Logger.log("Client " + conn.getRemoteSocketAddress().toString().replace("/", "") + " connected to the robot.");
         connections.add(conn);
     }
 
@@ -200,7 +201,7 @@ public class RustboardServer extends WebSocketServer { // TODO: public, but only
                 break;
             }
         }
-        Logger.log("client " + conn.getRemoteSocketAddress().toString() + " disconnected from the robot.");
+        Logger.log("W", "Client " + conn.getRemoteSocketAddress().toString().replace("/", "") + " disconnected from the robot.");
     }
 
     @Override

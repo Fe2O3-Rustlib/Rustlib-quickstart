@@ -34,18 +34,25 @@ public class RustboardNode {
     }
 
     void localUpdateState(Object state) {
-        this.state = state.toString();
+        processState(state.toString());
         lastUpdate = Time.now();
         updateClient();
     }
 
     void remoteUpdateState(Object state, long time) {
-        this.state = state.toString();
+        processState(state.toString());
         lastUpdate = new Time(time, true);
     }
 
-    String getState() {
+    private synchronized String processState(String newState) {
+        if (newState != null) {
+            state = newState;
+        }
         return state;
+    }
+
+    String getState() {
+        return processState(null);
     }
 
     public enum Type {

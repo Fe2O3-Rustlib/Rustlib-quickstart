@@ -4,6 +4,7 @@ import static org.rustlib.rustboard.JsonKeys.NODE_ARRAY_KEY;
 import static org.rustlib.rustboard.MessageActions.MESSAGE_ACTION_KEY;
 import static org.rustlib.rustboard.MessageActions.UPDATE_NODES;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -36,7 +37,7 @@ public class ClientUpdater implements Runnable {
             JsonObjectBuilder messageBuilder = Json.createObjectBuilder();
             messageBuilder.add(MESSAGE_ACTION_KEY, UPDATE_NODES);
             JsonArrayBuilder nodes = Json.createArrayBuilder();
-            Map<String, ClientUpdateRequest> nodeMap = new ConcurrentHashMap<>(toUpdate); // Copy the map to avoid concurrency issues in iteration
+            Map<String, ClientUpdateRequest> nodeMap = new HashMap<>(toUpdate); // Copy the map to avoid concurrency issues in iteration
             Set<String> keySet = nodeMap.keySet();
             if (keySet.size() == 0) {
                 return;

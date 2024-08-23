@@ -49,7 +49,7 @@ public class RustboardServer extends WebSocketServer { // TODO: public, but only
     private static final File RUSTBOARD_METADATA_FILE = new File(RUSTBOARD_STORAGE_DIR, "rustboard_metadata.json");
     static final File OLD_STORED_RUSTBOARD_DIR = new File(RUSTBOARD_STORAGE_DIR, "rustboards_previous");
     static final File NEW_STORED_RUSTBOARD_DIR = new File(RUSTBOARD_STORAGE_DIR, "rustboards_latest");
-    static final File USER_DATA_DIR = new File(RUSTBOARD_STORAGE_DIR, "user_data");
+    public static final File USER_DATA_DIR = new File(RUSTBOARD_STORAGE_DIR, "user_data");
     private static RustboardServer instance = null;
     private static boolean debugMode = false;
     private Rustboard activeRustboard;

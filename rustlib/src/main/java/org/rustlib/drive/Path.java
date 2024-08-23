@@ -1,5 +1,7 @@
 package org.rustlib.drive;
 
+import static org.rustlib.rustboard.RustboardServer.USER_DATA_DIR;
+
 import com.google.gson.JsonParseException;
 
 import org.rustlib.geometry.Rotation2d;
@@ -7,6 +9,7 @@ import org.rustlib.logging.Logger;
 import org.rustlib.utils.FileUtils;
 import org.rustlib.utils.Future;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,6 +17,7 @@ import java.util.function.Supplier;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonValue;
 
 public class Path implements Supplier<Path> {
     public final ArrayList<Supplier<Waypoint>> waypoints;
@@ -38,7 +42,11 @@ public class Path implements Supplier<Path> {
         return new Builder();
     }
 
-    private static Rotation2d getRotation(String data) {
+    private static Rotation2d getRotation(JsonValue json) {
+        if (json == null) {
+            return null;
+        }
+        String data = json.toString();
         double angle;
         try {
             angle = Double.parseDouble(data);
@@ -56,11 +64,11 @@ public class Path implements Supplier<Path> {
         }
     }
 
-    public static Path load(String fileName) {
-        fileName = fileName.replace(" ", "_") + ".json";
+    public static Path load(String pathName) {
+        String fileName = pathName.replace(" ", "_") + ".json";
         Builder pathBuilder = Path.getBuilder();
         try {
-            JsonObject path = FileUtils.loadJsonObject(fileName);
+            JsonObject path = FileUtils.loadJsonObject(new File(USER_DATA_DIR, fileName));
             double timeout = parseTimeout(path.getString("timeout"));
             JsonArray array = path.getJsonArray("points");
             for (int i = 0; i < array.size(); i++) {
@@ -69,8 +77,8 @@ public class Path implements Supplier<Path> {
                 double x = fieldVector.getJsonNumber("x").doubleValue();
                 double y = fieldVector.getJsonNumber("y").doubleValue();
                 double followRadius = object.getJsonNumber("followRadius").doubleValue();
-                Rotation2d targetFollowRotation = getRotation(object.get("targetFollowRotation").toString());
-                Rotation2d targetEndRotation = getRotation(object.get("targetEndRotation").toString());
+                Rotation2d targetFollowRotation = getRotation(object.get("targetFollowRotation"));
+                Rotation2d targetEndRotation = getRotation(object.get("targetEndRotation"));
                 double maxVelocity;
                 try {
                     maxVelocity = object.getJsonNumber("maxVelocity").doubleValue();
@@ -194,7 +202,7 @@ public class Path implements Supplier<Path> {
         }
 
         public Builder join(Path path) {
-            path.waypoints.forEach((Supplier<Waypoint> waypoint) -> waypoints.add(waypoint));
+            waypoints.addAll(path.waypoints);
             return this;
         }
 

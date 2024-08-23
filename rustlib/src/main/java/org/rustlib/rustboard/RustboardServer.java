@@ -19,6 +19,7 @@ import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 import org.rustlib.core.RobotBase;
+import org.rustlib.logging.Logger;
 import org.rustlib.rustboard.Rustboard.RustboardException;
 import org.rustlib.utils.FileUtils;
 
@@ -48,6 +49,7 @@ public class RustboardServer extends WebSocketServer { // TODO: public, but only
     private static final File RUSTBOARD_METADATA_FILE = new File(RUSTBOARD_STORAGE_DIR, "rustboard_metadata.json");
     static final File OLD_STORED_RUSTBOARD_DIR = new File(RUSTBOARD_STORAGE_DIR, "rustboards_previous");
     static final File NEW_STORED_RUSTBOARD_DIR = new File(RUSTBOARD_STORAGE_DIR, "rustboards_latest");
+    static final File USER_DATA_DIR = new File(RUSTBOARD_STORAGE_DIR, "user_data");
     private static RustboardServer instance = null;
     private static boolean debugMode = false;
     private Rustboard activeRustboard;
@@ -83,6 +85,7 @@ public class RustboardServer extends WebSocketServer { // TODO: public, but only
         super(new InetSocketAddress(port));
         setReuseAddr(true);
         FileUtils.makeDirIfMissing(RUSTBOARD_STORAGE_DIR);
+        FileUtils.makeDirIfMissing(USER_DATA_DIR);
         JsonObject defaultMetaData = Json.createObjectBuilder().add(RUSTBOARD_ARRAY_KEY, Json.createArrayBuilder().build()).build();
         rustboardMetaData = FileUtils.safeLoadJsonObject(RUSTBOARD_METADATA_FILE, defaultMetaData);
         if (rustboardMetaData.containsKey(RUSTBOARD_ARRAY_KEY)) {
@@ -228,6 +231,7 @@ public class RustboardServer extends WebSocketServer { // TODO: public, but only
                     }
                     rustboard.setConnection(conn);
                     loadedRustboards.put(uuid, rustboard);
+                    Logger.sendLog(conn);
                     if (isActiveRustboard() && !rustboard.getUuid().equals(activeRustboard.getUuid())) {
                         rustboard.notifyClient("Rustboard queued because another Rustboard is connected", NoticeType.NEUTRAL, 5000);
                     } else {
@@ -253,10 +257,7 @@ public class RustboardServer extends WebSocketServer { // TODO: public, but only
         activeRustboard = rustboard;
         JsonObjectBuilder builder = Json.createObjectBuilder();
         builder.add(MESSAGE_ACTION_KEY, SET_ACTIVE);
-        WebSocket connection = rustboard.getConnection();
-        if (connection != null) {
-            connection.send(builder.build().toString());
-        }
+        sendToConnection(rustboard.getConnection(), builder.build().toString());
     }
 
     public void saveLayouts() {
@@ -294,9 +295,7 @@ public class RustboardServer extends WebSocketServer { // TODO: public, but only
 
     public void broadcastToClients(String message) {
         for (WebSocket connection : connections) {
-            if (connection.isOpen()) {
-                connection.send(message);
-            }
+            sendToConnection(connection, message);
         }
     }
 
@@ -320,5 +319,11 @@ public class RustboardServer extends WebSocketServer { // TODO: public, but only
 
     public static void warnClientConsoles(Exception e) {
         warnClientConsoles(e.getMessage());
+    }
+
+    public static void sendToConnection(WebSocket connection, String message) {
+        if (connection != null && connection.isOpen()) {
+            connection.send(message);
+        }
     }
 }

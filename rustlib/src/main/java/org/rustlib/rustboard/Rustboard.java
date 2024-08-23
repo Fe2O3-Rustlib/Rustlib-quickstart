@@ -14,7 +14,7 @@ import static org.rustlib.rustboard.NoticeType.NOTICE_MESSAGE_KEY;
 import static org.rustlib.rustboard.NoticeType.NOTICE_TYPE_KEY;
 import static org.rustlib.rustboard.RustboardServer.NEW_STORED_RUSTBOARD_DIR;
 import static org.rustlib.rustboard.RustboardServer.OLD_STORED_RUSTBOARD_DIR;
-import static org.rustlib.rustboard.RustboardServer.RUSTBOARD_STORAGE_DIR;
+import static org.rustlib.rustboard.RustboardServer.USER_DATA_DIR;
 import static org.rustlib.rustboard.RustboardServer.log;
 
 import org.java_websocket.WebSocket;
@@ -207,7 +207,7 @@ public class Rustboard {
                 break;
             case MessageActions.SAVE_PATH:
                 try {
-                    FileUtils.writeString(new File(RUSTBOARD_STORAGE_DIR, messageJson.getString(NODE_ID_KEY)), Objects.requireNonNull(messageJson.get("path")).toString());
+                    FileUtils.writeString(new File(USER_DATA_DIR, messageJson.getString(NODE_ID_KEY)), Objects.requireNonNull(messageJson.get("path")).toString());
                     notifyClient("Saved path to robot", NoticeType.POSITIVE, 8000);
                 } catch (IOException | NullPointerException e) {
                     notifyClient("Could not save the path to the robot", NoticeType.NEGATIVE, 8000);
@@ -216,7 +216,7 @@ public class Rustboard {
                 break;
             case MessageActions.SAVE_VALUE:
                 try {
-                    FileUtils.writeString(RUSTBOARD_STORAGE_DIR, Objects.requireNonNull(messageJson.get("value")).toString());
+                    FileUtils.writeString(USER_DATA_DIR, Objects.requireNonNull(messageJson.get("value")).toString());
                     notifyClient("Saved value to robot", NoticeType.POSITIVE, 8000);
                 } catch (IOException | NullPointerException e) {
                     notifyClient("Could not save the value to the robot", NoticeType.NEGATIVE, 8000);
@@ -320,26 +320,20 @@ public class Rustboard {
     }
 
     public void addCallback(String buttonId, Runnable callback) {
-        if (nodeExists(buttonId, Type.BUTTON)) {
-            callbacks.put(buttonId, callback);
-        } else {
-            throw new NoSuchNodeException(buttonId);
+        if (!nodeExists(buttonId, Type.BUTTON)) {
+            this.nodes.add(new RustboardNode(buttonId, Type.BUTTON, ""));
         }
+        callbacks.put(buttonId, callback);
     }
 
     public void addCallback(String buttonId, Command command) {
-        callbacks.put(buttonId, command::schedule);
+        addCallback(buttonId, command::schedule);
     }
 
     public void clickButton(String buttonId) {
-        try {
-            callbacks.get(buttonId).run();
-        } catch (NullPointerException e) {
-            if (nodeExists(buttonId, Type.BUTTON)) {
-                throw new RuntimeException("No runnable was mapped to the button with id '" + buttonId + "'");
-            } else {
-                throw new NoSuchNodeException(buttonId);
-            }
+        Runnable callback = callbacks.get(buttonId);
+        if (callback != null) {
+            callback.run();
         }
     }
 
@@ -483,20 +477,20 @@ public class Rustboard {
         }
     }
 
-    private static String toFilePath(String fileName) {
-        return FileUtils.externalStorage + "\\" + fileName + ".txt";
+    private static File toSavedDataFilePath(String fileName) {
+        return new File(USER_DATA_DIR, fileName + ".txt");
     }
 
     public static String loadSavedString(String fileName, String defaultValue) {
-        return FileUtils.safeReadString(toFilePath(fileName), defaultValue);
+        return FileUtils.safeReadString(toSavedDataFilePath(fileName), defaultValue);
     }
 
     public static double loadSavedDouble(String fileName, double defaultValue) {
-        return FileUtils.loadDouble(toFilePath(fileName), defaultValue);
+        return FileUtils.loadDouble(toSavedDataFilePath(fileName), defaultValue);
     }
 
     public static long loadSavedLong(String fileName, long defaultValue) {
-        return FileUtils.loadLong(toFilePath(fileName), defaultValue);
+        return FileUtils.loadLong(toSavedDataFilePath(fileName), defaultValue);
     }
 
     public static class RustboardException extends RuntimeException {

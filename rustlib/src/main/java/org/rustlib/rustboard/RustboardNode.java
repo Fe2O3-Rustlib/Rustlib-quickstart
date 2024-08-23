@@ -34,25 +34,22 @@ public class RustboardNode {
     }
 
     void localUpdateState(Object state) {
-        processState(state.toString());
+        updateState(state.toString());
         lastUpdate = Time.now();
         updateClient();
     }
 
     void remoteUpdateState(Object state, long time) {
-        processState(state.toString());
+        updateState(state.toString());
         lastUpdate = new Time(time, true);
     }
 
-    private synchronized String processState(String newState) {
-        if (newState != null) {
-            state = newState;
-        }
-        return state;
+    private synchronized void updateState(String newState) {
+        state = newState;
     }
 
-    String getState() {
-        return processState(null);
+    synchronized String getState() {
+        return state;
     }
 
     public enum Type {
@@ -104,7 +101,7 @@ public class RustboardNode {
         JsonObjectBuilder builder = Json.createObjectBuilder();
         builder.add(NODE_ID_KEY, id);
         builder.add(NODE_TYPE_KEY, type.typeName);
-        builder.add(NODE_STATE_KEY, state);
+        builder.add(NODE_STATE_KEY, getState());
         builder.add(LAST_NODE_UPDATE_KEY, lastUpdate.getTimeMS());
         return builder;
     }
@@ -143,7 +140,7 @@ public class RustboardNode {
     public boolean strictEquals(Object o) {
         if (o instanceof RustboardNode) {
             RustboardNode node = (RustboardNode) o;
-            return id.equals(node.id) && type == node.type && state.equals(node.state);
+            return id.equals(node.id) && type == node.type && getState().equals(node.getState());
         }
         return false;
     }
@@ -168,7 +165,7 @@ public class RustboardNode {
 
     @Override
     public String toString() {
-        return String.format("id: '%s'\ntype: '%s'\nstate: '%s'\nlast update: %s", id, type.typeName, state, lastUpdate.getTimeMS());
+        return String.format("id: '%s'\ntype: '%s'\nstate: '%s'\nlast update: %s", id, type.typeName, getState(), lastUpdate.getTimeMS());
     }
 
     static class InvalidNodeJsonException extends RustboardException {

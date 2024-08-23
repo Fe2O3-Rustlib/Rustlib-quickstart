@@ -39,7 +39,7 @@ public class Time {
         this(0);
     }
 
-    private void calibrate(double offset) {
+    private synchronized void calibrate(double offset) {
         if (!locked) {
             time += offset;
             locked = true;
@@ -50,7 +50,7 @@ public class Time {
         return getTimeMS() / 1000;
     }
 
-    public long getTimeMS() {
+    public synchronized long getTimeMS() {
         return time;
     }
 

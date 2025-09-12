@@ -168,7 +168,7 @@ public abstract class RobotBase extends OpMode {
         runCallbacks(callbacks.get(1));
         robotStart();
         if (opModeCoreInstance != null) {
-            opModeCoreInstance.opmodeStart();
+            opModeCoreInstance.opModeStart();
         }
         if (this instanceof AutonomousCore) {
             Command autonomousCommand = ((AutonomousCore) this).getAutonomousCommand();

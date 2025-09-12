@@ -12,8 +12,8 @@ public class DriveConstants {
     public static PIDController.PIDGains rotGains = new PIDController.PIDGains(1.0, 0, 0);
 
     public static class Odometry {
-        public static double trackWidth = 13.658011373578302712160979877515;
-        public static double verticalDistance = 7.5035;
-        public static double inPerTick = 0.002968431495;
+        public static double trackWidth = 13.658011373578302712160979877515; //13.658011373578302712160979877515
+        public static double verticalDistance = 7.5035; //7.5035
+        public static double inPerTick = 0.00197895606558788; //0.002968431495; //0.000494739001;// this is given by: circumference of wheel/cpr
     }
 }

@@ -7,6 +7,7 @@ import org.rustlib.commandsystem.PurePursuitAutonomousCommand;
 import org.rustlib.commandsystem.SequentialCommandGroup;
 import org.rustlib.core.AutonomousCore;
 import org.rustlib.drive.Field;
+import org.rustlib.drive.FollowPathCommand;
 import org.rustlib.drive.Path;
 import org.rustlib.drive.Waypoint;
 import org.rustlib.geometry.Pose2d;
@@ -17,9 +18,14 @@ public abstract class AutonomousContainer extends Robot implements AutonomousCor
     protected static Pose2d blueLeftStartPosition = new Pose2d(58.944, 7.916899, new Rotation2d(Math.PI));
     protected static Pose2d blueRightStartPosition = blueLeftStartPosition.translateX(Field.tileLengthIn * 2);
     private OpenCVGameElementDetector gameElementDetector;
+    private final SequentialCommandGroup blueLeftMotionPath =
+            new SequentialCommandGroup(
+                    new FollowPathCommand(
+                            () -> Path.getBuilder().addWaypoint(0,5).addWaypoint(0,12).setDefaultMaxVelocity(0.8).setDefaultRadius(2).build(), drive)
+            );
     protected PurePursuitAutonomousCommand blueLeftCommand = new PurePursuitAutonomousCommand(
             blueLeftStartPosition,
-            new SequentialCommandGroup()
+            blueLeftMotionPath
     );
     protected PurePursuitAutonomousCommand redRightCommand = blueLeftCommand.mirror();
     protected PurePursuitAutonomousCommand blueRightCommand = new PurePursuitAutonomousCommand(

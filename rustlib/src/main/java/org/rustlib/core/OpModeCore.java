@@ -9,7 +9,7 @@ public interface OpModeCore {
 
     }
 
-    default void opmodeStart() {
+    default void opModeStart() {
 
     }
 

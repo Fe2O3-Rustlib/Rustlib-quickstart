@@ -152,6 +152,14 @@ public class MecanumBase {
         rb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
     }
 
+    public void drive(double leftF, double rightf, double leftB, double rightB, double acc)
+    {
+        lf.setPower(leftF);
+        rf.setPower(rightf);
+        lb.setPower(leftB);
+        rb.setPower(rightB);
+    }
+
     public void drive(double drive, double strafe, double turn, double botHeading, boolean squareInputs) {
         if (squareInputs) {
             drive = Math.copySign(Math.pow(drive, 2), drive);

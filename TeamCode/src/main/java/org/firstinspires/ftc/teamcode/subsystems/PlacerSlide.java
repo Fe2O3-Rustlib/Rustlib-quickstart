@@ -4,42 +4,38 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.constants.SubsystemConstants;
-import org.rustlib.commandsystem.InstantCommand;
 import org.rustlib.commandsystem.Subsystem;
-import org.rustlib.commandsystem.Trigger;
 import org.rustlib.control.PIDController;
 import org.rustlib.hardware.PairedEncoder;
 import org.rustlib.rustboard.Rustboard;
 
-public class Slide extends Subsystem {
+public class PlacerSlide extends Subsystem {
+    public final DcMotor motor0;
     public final DcMotor motor1;
-    public final DcMotor motor2;
     public final PairedEncoder encoder;
     private final PIDController controller;
-    private final TouchSensor limit;
+    public final TouchSensor limit;
     private final Placer placer;
     private double feedforward = 0;
     private int targetPosition = 0;
     private double lastSpeed = 0;
     private double lastInput = 0;
 
-    public Slide(HardwareMap hardwareMap, Placer placer) {
-        motor1 = hardwareMap.get(DcMotor.class, "slideMotor1");
-        motor2 = hardwareMap.get(DcMotor.class, "slideMotor2");
+    public PlacerSlide(HardwareMap hardwareMap, Placer placer) {
+        motor0 = hardwareMap.get(DcMotor.class, "placerSlide1");
+        motor0.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motor0.setDirection(DcMotorSimple.Direction.FORWARD);
+        motor1 = hardwareMap.get(DcMotor.class, "placerSlide2");
         motor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motor1.setDirection(DcMotorSimple.Direction.REVERSE);
-        motor2.setDirection(DcMotorSimple.Direction.REVERSE);
-        encoder = new PairedEncoder(hardwareMap.get(DcMotor.class, "lf"), false);
+        motor1.setDirection(DcMotorSimple.Direction.FORWARD);
+        encoder = new PairedEncoder(hardwareMap.get(DcMotor.class, "placerSlide1"), false);
         encoder.reset();
         limit = hardwareMap.get(TouchSensor.class, "limit");
         this.placer = placer;
         controller = new PIDController(0.0017, 0.0000008, 0.000003);
-
-//        new Trigger(() -> encoder.getTicks() > SubsystemConstants.Slide.preparePlacerPosition && encoder.ticksPerSecond() > 0).onTrue(new InstantCommand(placer::placePosition));
-//        new Trigger(() -> encoder.getTicks() < SubsystemConstants.Slide.stowPlacerPosition && targetPosition < 10 || encoder.ticksPerSecond() < -400).onTrue(new InstantCommand(placer::storagePosition));
     }
 
     private static boolean gamepadActive(double input) {
@@ -48,7 +44,7 @@ public class Slide extends Subsystem {
 
     public void mizoom(double input) {
         double calculatedSpeed;
-        if (gamepadActive(input) && !(input > 0 && encoder.getTicks() > SubsystemConstants.Slide.maxExtensionPosition)) { // If manual control is both requested and allowed
+        if (gamepadActive(input) && !(input > 0 && encoder.getTicks() > SubsystemConstants.PlacerSlide.maxExtensionPosition) && !(input < 0 && encoder.getTicks() < SubsystemConstants.PlacerSlide.minExtensionPosition)) { // If manual control is both requested and allowed
             calculatedSpeed = input + feedforward;
             lastInput = input;
         } else { // If automatic control is requested or manual control is not allowed
@@ -68,7 +64,6 @@ public class Slide extends Subsystem {
 
     private double applyAccelerationLimits(double speed) {
         double accelMax = Rustboard.getDouble("slide accel", 0.5);
-        ;
         if (speed > 0) {
             speed = Math.min(lastSpeed + accelMax, speed);
         } else {
@@ -77,18 +72,31 @@ public class Slide extends Subsystem {
         return speed;
     }
 
-    private void drive(double speed) {
-        motor1.setPower(speed);
-        motor2.setPower(-speed);
+    public void drive(double speed) {
+        if (limit.isPressed()) {
+            encoder.reset();
+            targetPosition = Math.max(targetPosition, 0);
+        }
+
+        motor0.setPower(Range.clip(speed, -SubsystemConstants.PlacerSlide.defaultSpeed, SubsystemConstants.PlacerSlide.defaultSpeed));
+        motor1.setPower(Range.clip(speed, -SubsystemConstants.PlacerSlide.defaultSpeed, SubsystemConstants.PlacerSlide.defaultSpeed));
         lastSpeed = speed;
     }
 
     public void setTargetPosition(int targetPosition) {
-        this.targetPosition = Math.min(targetPosition, SubsystemConstants.Slide.maxExtensionPosition);
+        this.targetPosition = Range.clip(targetPosition, SubsystemConstants.PlacerSlide.minExtensionPosition,SubsystemConstants.PlacerSlide.maxExtensionPosition);
+    }
+    public int getTargetPosition(){
+        return targetPosition;
+    }
+    public boolean atTargetPosition() {
+        return Math.abs(targetPosition - encoder.getTicks()) < SubsystemConstants.PlacerSlide.maxTargetError;
     }
 
-    public boolean atTargetPosition() {
-        return Math.abs(targetPosition - encoder.getTicks()) < SubsystemConstants.Slide.maxTargetError;
+    public void runToPosition(){
+        motor0.setTargetPosition(targetPosition);
+        motor1.setTargetPosition(targetPosition);
+        mizoom(controller.calculate(encoder.getPosition(),targetPosition));
     }
 
     @Override

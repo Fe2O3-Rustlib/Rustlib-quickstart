@@ -10,7 +10,7 @@ import org.rustlib.drive.FollowPathCommand;
 import org.rustlib.drive.Path;
 import org.rustlib.geometry.Pose2d;
 
-@Disabled
+
 @Autonomous(name = "Path Tuner")
 public class PathTuner extends AutonomousContainer {
     @Override
